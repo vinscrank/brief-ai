@@ -28,4 +28,9 @@ API docs: http://localhost:8000/docs
 
 ## Learning path
 
-See `docs/` for step-by-step guides (phases 0-5).
+See `docs/` for step-by-step guides:
+
+- Phases 0-6: database, backend, LLM
+- Phase 8: frontend Next.js
+- Phase 9: deploy backend (Docker + Google Cloud Run)
+- Phase 10: deploy frontend (Vercel)
