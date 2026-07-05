@@ -264,6 +264,31 @@ Non serve fare nulla manualmente dopo la prima configurazione.
 
 ## Troubleshooting
 
+### Errore: `Missing public directory` + `Missing build script`
+
+**Causa:** Vercel **non** sta usando la cartella `frontend`. Guarda la root del repo, non trova un `package.json` con build Next.js, e tratta il progetto come sito statico che deve outputtare in `public/`.
+
+**Soluzione (passo passo):**
+
+1. Vercel Dashboard → il tuo progetto → **Settings**
+2. **General** → scorri fino a **Root Directory**
+3. Clicca **Edit** → scrivi o seleziona **`frontend`** → **Save**
+4. Sempre in **General** → **Build & Development Settings**:
+
+| Campo | Valore corretto |
+|-------|-----------------|
+| Framework Preset | **Next.js** |
+| Root Directory | **frontend** |
+| Build Command | default (override **OFF**) |
+| Output Directory | **vuoto** (override **OFF**) |
+| Install Command | default (override **OFF**) |
+
+5. **Deployments** → ultimo deploy → menu `...` → **Redeploy**
+
+**Se continua a fallire:** elimina il progetto su Vercel e reimportalo da zero, impostando **Root Directory = `frontend` PRIMA** del primo Deploy.
+
+---
+
 ### Errore: `No Output Directory named "public" found`
 
 **Causa:** in Vercel e' impostato **Output Directory = `public`**. Quello vale per siti statici, non per Next.js.
