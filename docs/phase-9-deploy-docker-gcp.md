@@ -381,26 +381,20 @@ gcloud run services delete briefscope-backend --region=europe-west1
 
 ## Deploy Frontend su Vercel
 
-### 1. Aggiorna URL backend
+Guida completa: **`docs/phase-10-deploy-vercel.md`**
 
-Modifica `frontend/.env.local`:
-```
-NEXT_PUBLIC_API_URL=https://briefscope-backend-xxxxxx-ew.a.run.app
-```
+| Servizio | URL produzione |
+|----------|----------------|
+| Frontend | https://briefgen-ai.vercel.app |
+| Backend | https://briefscope-backend-949475606814.europe-west1.run.app |
 
-### 2. Deploy
+Dopo il deploy frontend, aggiorna CORS su Cloud Run:
 
 ```bash
-npm install -g vercel
-cd /Users/vincenzo/Desktop/websites/briefscope-ai/frontend
-vercel
+gcloud run services update briefscope-backend \
+  --region europe-west1 \
+  --update-env-vars "FRONTEND_URL=https://briefgen-ai.vercel.app"
 ```
-
-### 3. Configura variabili su Vercel
-
-1. https://vercel.com/dashboard → seleziona progetto
-2. **Settings** → **Environment Variables**
-3. Aggiungi: `NEXT_PUBLIC_API_URL` = URL del backend
 
 ---
 

@@ -26,6 +26,14 @@ uvicorn app.main:app --reload --port 8000
 
 API docs: http://localhost:8000/docs
 
+## Live (produzione)
+
+| | URL |
+|---|-----|
+| Frontend | https://briefgen-ai.vercel.app |
+| Backend API | https://briefscope-backend-949475606814.europe-west1.run.app |
+| Swagger | https://briefscope-backend-949475606814.europe-west1.run.app/docs |
+
 ## Learning path
 
 See `docs/` for step-by-step guides:

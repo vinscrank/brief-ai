@@ -61,8 +61,19 @@ Dopo il deploy, aggiorna CORS sul backend:
 ```bash
 gcloud run services update briefscope-backend \
   --region europe-west1 \
-  --update-env-vars "FRONTEND_URL=https://TUO-PROGETTO.vercel.app"
+  --update-env-vars "FRONTEND_URL=https://briefgen-ai.vercel.app"
 ```
+
+---
+
+## URL Produzione (BriefScope AI)
+
+| Servizio | URL |
+|----------|-----|
+| **Frontend (Vercel)** | https://briefgen-ai.vercel.app |
+| **Backend (Cloud Run)** | https://briefscope-backend-949475606814.europe-west1.run.app |
+| **Backend Swagger** | https://briefscope-backend-949475606814.europe-west1.run.app/docs |
+| **Backend Health** | https://briefscope-backend-949475606814.europe-west1.run.app/health |
 
 ---
 
@@ -146,8 +157,10 @@ Clicca **Deploy** e attendi 1-2 minuti.
 
 Al termine otterrai un URL tipo:
 ```
-https://briefscope-ai.vercel.app
+https://briefgen-ai.vercel.app
 ```
+
+URL produzione attuale del progetto: **https://briefgen-ai.vercel.app**
 
 Se vedi l'avviso giallo:
 > "Configuration Settings in the current Production deployment differ from your current Project Settings"
@@ -169,7 +182,7 @@ Usa questa checklist se il deploy fallisce o per verificare che tutto sia corret
 [ ] Override Install Command: OFF
 [ ] NEXT_PUBLIC_API_URL impostata su Vercel
 [ ] Redeploy dopo ogni modifica alle impostazioni
-[ ] FRONTEND_URL aggiornato su Cloud Run (CORS)
+[ ] FRONTEND_URL=https://briefgen-ai.vercel.app su Cloud Run (CORS)
 ```
 
 ### Struttura monorepo
@@ -218,7 +231,7 @@ Risposte consigliate al primo deploy:
 | Set up and deploy? | **Y** |
 | Which scope? | il tuo account |
 | Link to existing project? | **N** (prima volta) |
-| Project name? | `briefscope-ai` |
+| Project name (Vercel) | `briefgen-ai` |
 | In which directory is your code? | `./` |
 | Override settings? | **N** |
 
@@ -252,20 +265,15 @@ Il frontend su Vercel chiama il backend su Cloud Run. Senza CORS corretto, il br
 
 Il backend legge già la variabile `FRONTEND_URL` in `backend/app/main.py`.
 
-Dopo il deploy Vercel, esegui:
+Dopo il deploy Vercel, esegui (comando gia usato in produzione):
 
 ```bash
 gcloud run services update briefscope-backend \
   --region europe-west1 \
-  --update-env-vars "FRONTEND_URL=https://TUO-PROGETTO.vercel.app"
+  --update-env-vars "FRONTEND_URL=https://briefgen-ai.vercel.app"
 ```
 
-Esempio reale:
-```bash
-gcloud run services update briefscope-backend \
-  --region europe-west1 \
-  --update-env-vars "FRONTEND_URL=https://briefscope-ai.vercel.app"
-```
+Se il nome progetto Vercel cambia, sostituisci l'URL con quello nuovo (es. `https://TUO-PROGETTO.vercel.app`).
 
 > **Nota:** l'URL deve essere identico a quello Vercel, con `https://` e senza slash finale.
 
@@ -277,7 +285,7 @@ Se usi un dominio custom su Vercel, aggiorna `FRONTEND_URL` con quello.
 
 ### Checklist
 
-1. Apri l'URL Vercel nel browser
+1. Apri https://briefgen-ai.vercel.app
 2. Landing page visibile
 3. Vai su **Dashboard** → deve caricare i brief (no errori in console)
 4. Crea un brief e lancia **Analyze**
@@ -304,7 +312,7 @@ Se vedi errori tipo:
 Access to fetch at '...' from origin 'https://...vercel.app' has been blocked by CORS policy
 ```
 
-→ `FRONTEND_URL` su Cloud Run non corrisponde all'URL Vercel.
+→ `FRONTEND_URL` su Cloud Run non corrisponde all'URL Vercel (es. frontend su `briefgen-ai.vercel.app` ma backend senza quella origin).
 
 ---
 
@@ -385,7 +393,7 @@ Compare quando hai cambiato le impostazioni ma l'ultimo deploy e' ancora quello 
 ```bash
 gcloud run services update briefscope-backend \
   --region europe-west1 \
-  --update-env-vars "FRONTEND_URL=https://TUO-URL.vercel.app"
+  --update-env-vars "FRONTEND_URL=https://briefgen-ai.vercel.app"
 ```
 
 Poi ricarica la pagina Vercel.
@@ -454,6 +462,7 @@ Full Stack Architecture:
 
 | Risorsa | URL |
 |---------|-----|
+| **Frontend live** | https://briefgen-ai.vercel.app |
 | Vercel Dashboard | https://vercel.com/dashboard |
 | Vercel Docs | https://vercel.com/docs |
 | Cloud Run Console | https://console.cloud.google.com/run?project=briefscope-ai-prod |
