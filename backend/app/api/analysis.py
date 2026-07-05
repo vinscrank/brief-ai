@@ -6,17 +6,22 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.analysis_schema import AnalysisResponse
 from app.services import brief_service
-from app.services.brief_analyzer import create_mock_analysis, get_analysis
+from app.services.brief_analyzer import analyze_brief, get_analysis
 
 router = APIRouter(prefix="/briefs", tags=["analysis"])
 
 
 @router.post("/{brief_id}/analyze", response_model=AnalysisResponse)
-def analyze_brief(brief_id: UUID, db: Session = Depends(get_db)):
+def analyze_brief_endpoint(brief_id: UUID, db: Session = Depends(get_db)):
     brief = brief_service.get_brief(db, brief_id)
     if not brief:
         raise HTTPException(status_code=404, detail="Brief not found")
-    return create_mock_analysis(db, brief)
+    try:
+        return analyze_brief(db, brief)
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=502, detail="LLM analysis failed")
 
 
 @router.get("/{brief_id}/analysis", response_model=AnalysisResponse)
