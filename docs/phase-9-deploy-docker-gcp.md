@@ -13,79 +13,93 @@ Deployare il backend FastAPI su Google Cloud Run usando Docker.
 - Account Google (Gmail)
 - Docker Desktop installato
 - Google Cloud CLI installato
+- Mac con Apple Silicon (M1/M2/M3) o Intel
 
 ---
 
-## Step 1: Installa gli strumenti
+## COMANDI RAPIDI (Riferimento Veloce)
 
-### 1.1 Google Cloud CLI
+Se hai già tutto configurato, ecco i comandi per il deploy:
+
+```bash
+cd /Users/vincenzo/Desktop/websites/briefscope-ai/backend
+
+# 1. Build (IMPORTANTE: --platform per Mac Apple Silicon)
+docker build --platform linux/amd64 -t europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest .
+
+# 2. Push
+docker push europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest
+
+# 3. Deploy con env vars
+gcloud run deploy briefscope-backend \
+    --image=europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest \
+    --region=europe-west1 \
+    --platform=managed \
+    --allow-unauthenticated \
+    --min-instances=0 \
+    --max-instances=1 \
+    --memory=512Mi \
+    --port=8080 \
+    --set-env-vars='^##^DATABASE_URL=TUA_NEON_URL##LLM_API_KEY=TUA_OPENAI_KEY##LLM_MODEL=gpt-4o-mini'
+```
+
+---
+
+## Setup Iniziale (Prima Volta)
+
+### Step 1: Installa gli strumenti
+
+#### Google Cloud CLI
 
 ```bash
 brew install google-cloud-sdk
-```
-
-Verifica:
-```bash
 gcloud --version
 ```
 
-### 1.2 Docker Desktop
+#### Docker Desktop
 
 ```bash
 brew install --cask docker
 ```
 
-**IMPORTANTE:** Dopo l'installazione, apri Docker Desktop dalle Applicazioni e aspetta che sia pronto (icona stabile nella barra menu).
+**IMPORTANTE:** Apri Docker Desktop dalle Applicazioni e aspetta che sia pronto (icona stabile).
 
 ---
 
-## Step 2: Login e Setup Progetto Google Cloud
-
-### 2.1 Login
+### Step 2: Login e Setup Progetto
 
 ```bash
+# Login
 gcloud auth login
-```
 
-Si apre il browser → accedi con Google.
-
-### 2.2 Crea progetto
-
-```bash
+# Crea progetto
 gcloud projects create briefscope-ai-prod --name="BriefScope AI"
-```
 
-### 2.3 Imposta come progetto default
-
-```bash
+# Imposta come default
 gcloud config set project briefscope-ai-prod
 ```
 
 ---
 
-## Step 3: Configura Billing
-
-Google richiede billing anche per il free tier (non addebita nulla se resti nei limiti).
-
-### 3.1 Vedi i tuoi account billing
+### Step 3: Configura Billing
 
 ```bash
+# Vedi account billing
 gcloud billing accounts list
 ```
 
-Output esempio:
+Output:
 ```
 ACCOUNT_ID            NAME                    OPEN
 01A0EB-D000BD-DA1A67  Account fatturazione    True
 ```
 
-### 3.2 Collega billing al progetto
-
 ```bash
-gcloud billing projects link briefscope-ai-prod --billing-account=IL_TUO_ACCOUNT_ID
+# Collega al progetto (usa l'ID con OPEN=True)
+gcloud billing projects link briefscope-ai-prod --billing-account=01A0EB-D000BD-DA1A67
 ```
 
-### 3.3 Imposta Budget Alert (IMPORTANTE!)
+#### Imposta Budget Alert (IMPORTANTE per non pagare!)
 
 1. Vai su https://console.cloud.google.com
 2. Menu (☰) → **Fatturazione** → **Budget e avvisi**
@@ -98,7 +112,7 @@ gcloud billing projects link briefscope-ai-prod --billing-account=IL_TUO_ACCOUNT
 
 ---
 
-## Step 4: Abilita API necessarie
+### Step 4: Abilita API
 
 ```bash
 gcloud services enable cloudbuild.googleapis.com run.googleapis.com artifactregistry.googleapis.com
@@ -106,64 +120,49 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com artifactregi
 
 ---
 
-## Step 5: Crea Repository Docker
-
-### 5.1 Crea repository su Artifact Registry
+### Step 5: Crea Repository Docker
 
 ```bash
+# Crea repository
 gcloud artifacts repositories create briefscope-repo \
     --repository-format=docker \
     --location=europe-west1 \
     --description="BriefScope AI Docker images"
-```
 
-### 5.2 Configura Docker per usare Google Cloud
-
-```bash
+# Configura Docker per usare Google Cloud
 gcloud auth configure-docker europe-west1-docker.pkg.dev
 ```
 
-Quando chiede conferma, scrivi `Y` e premi Invio.
-
-### 5.3 Verifica su console
-
-Vai su: https://console.cloud.google.com/artifacts?project=briefscope-ai-prod
-
-Vedrai `briefscope-repo` nella lista (Menu → Artifact Registry).
+Scrivi `Y` quando chiede conferma.
 
 ---
 
-## Step 6: Build e Push Docker Image
+## Build e Deploy
 
-### 6.1 Assicurati che Docker Desktop sia avviato
+### Step 6: Build Docker Image
 
-Apri Docker Desktop e aspetta che sia pronto.
-
-### 6.2 Vai nella cartella backend
+**IMPORTANTE PER MAC APPLE SILICON (M1/M2/M3):**
 
 ```bash
 cd /Users/vincenzo/Desktop/websites/briefscope-ai/backend
+
+# Build per architettura Cloud Run (linux/amd64)
+docker build --platform linux/amd64 -t europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest .
 ```
 
-### 6.3 Build dell'immagine
+> **ATTENZIONE:** Se non usi `--platform linux/amd64` su Mac Apple Silicon, otterrai errore `exec format error` su Cloud Run!
 
-```bash
-docker build -t europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest .
-```
+---
 
-Aspetta 1-2 minuti. Vedrai `Step 1/6`, `Step 2/6`, ecc.
-
-### 6.4 Push su Google Cloud
+### Step 7: Push su Google Cloud
 
 ```bash
 docker push europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest
 ```
 
-Aspetta 2-3 minuti per l'upload.
-
 ---
 
-## Step 7: Deploy su Cloud Run
+### Step 8: Deploy su Cloud Run
 
 ```bash
 gcloud run deploy briefscope-backend \
@@ -173,30 +172,26 @@ gcloud run deploy briefscope-backend \
     --allow-unauthenticated \
     --min-instances=0 \
     --max-instances=1 \
-    --memory=256Mi \
+    --memory=512Mi \
     --port=8080 \
-    --set-env-vars="DATABASE_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require" \
-    --set-env-vars="LLM_API_KEY=sk-your-openai-key" \
-    --set-env-vars="LLM_MODEL=gpt-4o-mini"
+    --set-env-vars='^##^DATABASE_URL=postgresql://USER:PASS@HOST/DB?sslmode=require##LLM_API_KEY=sk-xxx##LLM_MODEL=gpt-4o-mini'
 ```
 
-**IMPORTANTE:** Sostituisci:
-- `DATABASE_URL` con la tua connection string di Neon
-- `LLM_API_KEY` con la tua API key OpenAI
+**Nota sulla sintassi env vars:**
+- `^##^` indica che `##` è il separatore tra variabili
+- Questo evita problemi con caratteri speciali come `?` e `=` nella DATABASE_URL
 
-### Output
-
+**Output atteso:**
 ```
 Service URL: https://briefscope-backend-xxxxxx-ew.a.run.app
 ```
 
-**Questo è l'URL del tuo backend!**
-
 ---
 
-## Step 8: Testa il Deploy
+### Step 9: Verifica Deploy
 
 ```bash
+# Test health
 curl https://briefscope-backend-xxxxxx-ew.a.run.app/health
 ```
 
@@ -205,63 +200,135 @@ Risposta attesa:
 {"status":"ok","database":"connected"}
 ```
 
-Puoi anche aprire nel browser:
+Apri Swagger:
 ```
 https://briefscope-backend-xxxxxx-ew.a.run.app/docs
 ```
 
-Vedrai Swagger con tutte le API.
+---
+
+## Troubleshooting e Debug
+
+### Dove vedere i log
+
+1. **Console Google Cloud:**
+   https://console.cloud.google.com/logs?project=briefscope-ai-prod
+
+2. **Da terminale:**
+   ```bash
+   gcloud run services logs read briefscope-backend --region=europe-west1 --limit=50
+   ```
+
+3. **Link diretto dai log di errore:**
+   Quando il deploy fallisce, copia il "Logs URL" dall'errore e aprilo nel browser.
 
 ---
 
-## Step 9: Deploy Frontend su Vercel
+### Errori Comuni e Soluzioni
 
-### 9.1 Aggiorna URL backend
+#### Errore: "Billing account not found"
 
-Modifica `frontend/.env.local`:
 ```
-NEXT_PUBLIC_API_URL=https://briefscope-backend-xxxxxx-ew.a.run.app
+FAILED_PRECONDITION: Billing account for project 'xxx' is not found
 ```
 
-### 9.2 Installa Vercel CLI
-
+**Soluzione:**
 ```bash
-npm install -g vercel
+gcloud billing accounts list
+gcloud billing projects link briefscope-ai-prod --billing-account=IL_TUO_ACCOUNT_ID
 ```
 
-### 9.3 Deploy
+---
 
+#### Errore: "Cannot connect to Docker daemon"
+
+```
+Cannot connect to the Docker daemon at unix:///Users/xxx/.docker/run/docker.sock
+```
+
+**Soluzione:**
+Apri Docker Desktop dalle Applicazioni e aspetta che sia pronto.
+
+---
+
+#### Errore: "exec format error" (COMUNE SU MAC M1/M2/M3!)
+
+```
+terminated: Application failed to start: failed to load /bin/sh: exec format error
+```
+
+**Causa:** L'immagine è stata compilata per ARM (Mac Apple Silicon) ma Cloud Run usa AMD64.
+
+**Soluzione:**
 ```bash
-cd /Users/vincenzo/Desktop/websites/briefscope-ai/frontend
-vercel
+docker build --platform linux/amd64 -t nome-immagine .
 ```
 
-Segui le istruzioni:
-- Link to existing project? **No**
-- Project name: **briefscope-ai**
-- Directory: **./**
-- Override settings? **No**
+---
 
-### 9.4 Configura variabili su Vercel
+#### Errore: "Container failed to start - port 8080"
 
-1. Vai su https://vercel.com/dashboard
-2. Seleziona il progetto `briefscope-ai`
-3. **Settings** → **Environment Variables**
-4. Aggiungi:
-   - `NEXT_PUBLIC_API_URL` = `https://briefscope-backend-xxxxxx-ew.a.run.app`
-5. **Redeploy** per applicare le variabili
+```
+The user-provided container failed to start and listen on the port defined by PORT=8080
+```
+
+**Possibili cause:**
+1. App crasha all'avvio (variabili d'ambiente mancanti)
+2. Timeout troppo breve
+3. Architettura sbagliata (vedi errore sopra)
+
+**Debug:**
+1. Testa in locale prima:
+   ```bash
+   docker run -p 8081:8080 \
+     -e DATABASE_URL="..." \
+     -e LLM_API_KEY="..." \
+     -e LLM_MODEL="gpt-4o-mini" \
+     nome-immagine
+   ```
+
+2. Controlla i log su Google Cloud Console
+
+3. Verifica che tutte le env vars siano passate correttamente
+
+---
+
+#### Errore: "Port already allocated" (locale)
+
+```
+Bind for 0.0.0.0:8080 failed: port is already allocated
+```
+
+**Soluzione:**
+```bash
+# Usa porta diversa
+docker run -p 8081:8080 ...
+
+# Oppure ferma tutti i container
+docker stop $(docker ps -q)
+```
+
+---
+
+#### Errore: "Permission denied" su gcloud
+
+**Soluzione:**
+```bash
+gcloud auth login
+gcloud config set project briefscope-ai-prod
+```
 
 ---
 
 ## Comandi Utili
 
-### Aggiornare il backend dopo modifiche
+### Aggiornare dopo modifiche al codice
 
 ```bash
 cd /Users/vincenzo/Desktop/websites/briefscope-ai/backend
 
-# Rebuild
-docker build -t europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest .
+# Rebuild (ricorda --platform su Mac M1/M2/M3!)
+docker build --platform linux/amd64 -t europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest .
 
 # Push
 docker push europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest
@@ -275,13 +342,7 @@ gcloud run deploy briefscope-backend \
 ### Vedere i log
 
 ```bash
-gcloud run logs read --service=briefscope-backend --region=europe-west1 --limit=50
-```
-
-### Vedere stato servizio
-
-```bash
-gcloud run services describe briefscope-backend --region=europe-west1
+gcloud run services logs read briefscope-backend --region=europe-west1 --limit=50
 ```
 
 ### Vedere URL del servizio
@@ -290,98 +351,88 @@ gcloud run services describe briefscope-backend --region=europe-west1
 gcloud run services describe briefscope-backend --region=europe-west1 --format='value(status.url)'
 ```
 
+### Aggiornare variabili d'ambiente
+
+```bash
+gcloud run services update briefscope-backend \
+    --region=europe-west1 \
+    --set-env-vars="NUOVA_VAR=valore"
+```
+
+### Eliminare il servizio
+
+```bash
+gcloud run services delete briefscope-backend --region=europe-west1
+```
+
 ---
 
-## Dove vedere tutto su Console
+## Console Google Cloud (Link Utili)
 
 | Cosa | Link |
 |------|------|
-| **Cloud Run (servizi)** | https://console.cloud.google.com/run?project=briefscope-ai-prod |
-| **Artifact Registry (immagini)** | https://console.cloud.google.com/artifacts?project=briefscope-ai-prod |
+| **Cloud Run** | https://console.cloud.google.com/run?project=briefscope-ai-prod |
+| **Artifact Registry** | https://console.cloud.google.com/artifacts?project=briefscope-ai-prod |
 | **Logs** | https://console.cloud.google.com/logs?project=briefscope-ai-prod |
-| **Billing** | https://console.cloud.google.com/billing?project=briefscope-ai-prod |
+| **Fatturazione** | https://console.cloud.google.com/billing?project=briefscope-ai-prod |
 | **Budget** | https://console.cloud.google.com/billing/budgets?project=briefscope-ai-prod |
 
 ---
 
-## Troubleshooting
+## Deploy Frontend su Vercel
 
-### Errore: "Billing account not found"
+### 1. Aggiorna URL backend
 
-```bash
-gcloud billing accounts list
-gcloud billing projects link briefscope-ai-prod --billing-account=IL_TUO_ACCOUNT_ID
+Modifica `frontend/.env.local`:
+```
+NEXT_PUBLIC_API_URL=https://briefscope-backend-xxxxxx-ew.a.run.app
 ```
 
-### Errore: "Cannot connect to Docker daemon"
-
-Docker Desktop non è avviato. Aprilo dalle Applicazioni e aspetta che sia pronto.
-
-### Errore: "Permission denied" su gcloud
+### 2. Deploy
 
 ```bash
-gcloud auth login
-gcloud config set project briefscope-ai-prod
+npm install -g vercel
+cd /Users/vincenzo/Desktop/websites/briefscope-ai/frontend
+vercel
 ```
 
-### Errore: "Image not found" durante deploy
+### 3. Configura variabili su Vercel
 
-```bash
-gcloud auth configure-docker europe-west1-docker.pkg.dev
-docker push europe-west1-docker.pkg.dev/briefscope-ai-prod/briefscope-repo/backend:latest
-```
-
-### Errore: Database connection failed
-
-Verifica che `DATABASE_URL` sia corretto:
-```bash
-gcloud run services update briefscope-backend \
-    --region=europe-west1 \
-    --set-env-vars="DATABASE_URL=postgresql://..."
-```
+1. https://vercel.com/dashboard → seleziona progetto
+2. **Settings** → **Environment Variables**
+3. Aggiungi: `NEXT_PUBLIC_API_URL` = URL del backend
 
 ---
 
 ## Costi
 
-### Google Cloud Run - Free Tier (mensile)
+### Free Tier Mensile
 
-| Risorsa | Limite Gratis |
-|---------|---------------|
-| Richieste | 2 milioni |
-| CPU | 180.000 vCPU-secondi |
-| Memoria | 360.000 GB-secondi |
-| Networking | 1 GB |
-
-### Vercel - Free Tier
-
-| Risorsa | Limite |
-|---------|--------|
-| Bandwidth | 100 GB |
-| Deploys | Illimitati |
-| Progetti | Illimitati |
+| Servizio | Limite Gratis |
+|----------|---------------|
+| Cloud Run | 2M richieste, 180k vCPU-sec |
+| Artifact Registry | 500MB storage |
+| Vercel | 100GB bandwidth |
 
 **Per un portfolio: $0/mese**
 
 ---
 
-## Cosa scrivere nel CV
+## Dockerfile Finale
 
-```
-DevOps & Cloud:
-• Docker (containerizzazione applicazioni Python)
-• Google Cloud Platform (Cloud Run, Artifact Registry)
-• Vercel (deploy frontend Next.js)
-• CI/CD deployment pipelines
+```dockerfile
+FROM python:3.11-slim
 
-Backend:
-• Python, FastAPI, SQLAlchemy
-• PostgreSQL (Neon serverless)
-• OpenAI API integration
+WORKDIR /app
 
-Frontend:
-• Next.js 15, React, TypeScript
-• Tailwind CSS, Framer Motion
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
 ```
 
 ---
@@ -404,4 +455,27 @@ Frontend:
                         │     API         │
                         │                 │
                         └─────────────────┘
+```
+
+---
+
+## Cosa scrivere nel CV
+
+```
+DevOps & Cloud:
+• Docker (containerizzazione, multi-arch build)
+• Google Cloud Platform (Cloud Run, Artifact Registry)
+• CI/CD deployment pipelines
+• Vercel (deploy frontend)
+
+Backend:
+• Python, FastAPI, SQLAlchemy
+• PostgreSQL (Neon serverless)
+• OpenAI API integration
+• RESTful API design
+
+Frontend:
+• Next.js 15, React, TypeScript
+• Tailwind CSS, Framer Motion
+• Responsive design
 ```
