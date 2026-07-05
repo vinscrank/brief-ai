@@ -15,8 +15,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FloatingOrbs, GridPattern, FloatingIcon } from "@/components/ui/floating-elements";
-import { FadeIn, ScaleIn, StaggerContainer, StaggerItem, BlurIn, Parallax } from "@/components/ui/scroll-animations";
+import { FloatingOrbs, GridPattern } from "@/components/ui/floating-elements";
+import { FadeIn, ScaleIn, StaggerContainer, StaggerItem, BlurIn } from "@/components/ui/scroll-animations";
 import { Typewriter, GradientText, CountUp, TextReveal } from "@/components/ui/animated-text";
 import { FeatureCard, BentoCard } from "@/components/ui/feature-card";
 import { ShimmerButton, AnimatedBorder, MagneticButton } from "@/components/ui/animated-border";
@@ -56,9 +56,24 @@ const features = [
 ];
 
 const stats = [
-  { value: 95, suffix: "%", label: "Accuracy" },
-  { value: 10, suffix: "x", label: "Faster" },
-  { value: 500, suffix: "+", label: "Briefs Analyzed" },
+  {
+    value: 95,
+    suffix: "%",
+    label: "Structured Output",
+    description: "Scope, risks, and gaps extracted automatically",
+  },
+  {
+    value: 10,
+    suffix: "x",
+    label: "Faster Review",
+    description: "From manual reading to instant analysis",
+  },
+  {
+    value: 3,
+    suffix: "",
+    label: "Steps to Proposal",
+    description: "Paste brief, analyze, generate response",
+  },
 ];
 
 const steps = [
@@ -263,79 +278,130 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <section className="relative py-32">
+          <section className="relative py-24 md:py-28">
             <div className="container mx-auto px-4">
-              <Parallax speed={-0.2}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                  {stats.map((stat, i) => (
-                    <ScaleIn key={stat.label} delay={i * 0.1}>
-                      <BentoCard className="p-8 text-center">
-                        <div className="text-5xl sm:text-6xl font-bold mb-2 text-glow">
-                          <GradientText>
-                            <CountUp end={stat.value} suffix={stat.suffix} />
-                          </GradientText>
-                        </div>
-                        <p className="text-muted-foreground text-lg">{stat.label}</p>
-                      </BentoCard>
-                    </ScaleIn>
-                  ))}
+              <FadeIn>
+                <div className="mx-auto max-w-5xl">
+                  <div className="text-center mb-10">
+                    <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-primary">
+                      Why teams use it
+                    </p>
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                      Less reading. <GradientText>More clarity.</GradientText>
+                    </h2>
+                    <p className="text-muted-foreground max-w-2xl mx-auto">
+                      One workflow to move from raw brief to structured analysis and proposal.
+                    </p>
+                  </div>
+
+                  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-card/30 backdrop-blur-xl">
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-violet-500/5" />
+
+                    <div className="relative grid md:grid-cols-3">
+                      {stats.map((stat, i) => (
+                        <motion.div
+                          key={stat.label}
+                          className={`relative px-6 py-8 sm:px-8 sm:py-10 ${
+                            i < stats.length - 1
+                              ? "md:border-r md:border-white/10 border-b md:border-b-0 border-white/10"
+                              : ""
+                          }`}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.1, duration: 0.5 }}
+                        >
+                          {i < stats.length - 1 && (
+                            <div className="hidden md:block absolute top-1/2 -right-3 z-10 h-6 w-6 -translate-y-1/2 rounded-full border border-white/10 bg-background/80 backdrop-blur-sm">
+                              <ArrowRight className="h-3.5 w-3.5 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                            </div>
+                          )}
+
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10 text-sm font-bold text-primary">
+                              {String(i + 1).padStart(2, "0")}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-4xl sm:text-5xl font-bold leading-none mb-2">
+                                <GradientText>
+                                  <CountUp end={stat.value} suffix={stat.suffix} />
+                                </GradientText>
+                              </div>
+                              <p className="font-semibold mb-1">{stat.label}</p>
+                              <p className="text-sm text-muted-foreground leading-relaxed">
+                                {stat.description}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </Parallax>
+              </FadeIn>
             </div>
           </section>
 
-          <section className="relative py-32">
+          <section className="relative py-24 md:py-32">
             <div className="container mx-auto px-4">
               <FadeIn>
-                <BentoCard className="relative overflow-hidden p-12 md:p-20 text-center max-w-5xl mx-auto">
-                  <FloatingIcon delay={0} className="absolute top-10 left-10 opacity-20">
-                    <Brain className="h-12 w-12 text-cyan-400" />
-                  </FloatingIcon>
-                  <FloatingIcon delay={1} className="absolute top-20 right-16 opacity-20">
-                    <Sparkles className="h-8 w-8 text-purple-400" />
-                  </FloatingIcon>
-                  <FloatingIcon delay={2} className="absolute bottom-16 left-20 opacity-20">
-                    <Zap className="h-10 w-10 text-cyan-400" />
-                  </FloatingIcon>
+                <div className="relative max-w-5xl mx-auto overflow-hidden rounded-3xl border border-white/10 bg-card/40 backdrop-blur-xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-violet-500/5" />
+                  <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+                  <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
 
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10"
-                    animate={{ opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  />
+                  <div className="relative grid gap-10 p-8 md:p-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+                    <div className="text-left">
+                      <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Start in minutes
+                      </p>
+                      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                        Turn the next brief into a{" "}
+                        <GradientText>clear proposal</GradientText>
+                      </h2>
+                      <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-xl">
+                        Paste a job post or client request, get structured analysis,
+                        and generate a proposal without rebuilding the workflow every time.
+                      </p>
+                    </div>
 
-                  <div className="relative z-10">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-                      Ready to Transform Your Workflow?
-                    </h2>
-                    <p className="text-muted-foreground text-lg mb-10 max-w-xl mx-auto">
-                      Stop spending hours analyzing briefs manually. Let AI do the
-                      work while you focus on winning clients.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                      <MagneticButton>
+                    <div className="rounded-2xl border border-white/10 bg-background/60 p-6 sm:p-8">
+                      <div className="space-y-4 mb-8">
+                        {[
+                          "Extract scope, risks, and missing info",
+                          "Generate client questions automatically",
+                          "Draft a proposal ready to refine",
+                        ].map((item) => (
+                          <div key={item} className="flex items-start gap-3 text-sm sm:text-base">
+                            <CheckCircle2 className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+                            <span className="text-muted-foreground">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-col gap-3">
                         <Link href="/briefs/new">
-                          <ShimmerButton className="text-lg px-8 py-4">
+                          <Button size="lg" className="w-full gap-2 h-12 bg-gradient-to-r from-cyan-500 to-violet-500 hover:opacity-90 shadow-lg">
                             <Brain className="h-5 w-5" />
                             Create Your First Brief
-                          </ShimmerButton>
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
                         </Link>
-                      </MagneticButton>
-                    </div>
+                        <Link href="/dashboard">
+                          <Button size="lg" variant="outline" className="w-full h-12 border-white/10 hover:bg-white/5">
+                            Open Dashboard
+                          </Button>
+                        </Link>
+                      </div>
 
-                    <div className="mt-10 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400" />
+                      <p className="mt-5 text-center text-xs text-muted-foreground">
                         No credit card required
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-400" />
-                        Free to start
-                      </div>
+                      </p>
                     </div>
                   </div>
-                </BentoCard>
+                </div>
               </FadeIn>
             </div>
           </section>
