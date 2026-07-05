@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from openai import APIError, AuthenticationError, RateLimitError
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -20,8 +21,17 @@ def analyze_brief_endpoint(brief_id: UUID, db: Session = Depends(get_db)):
         return analyze_brief(db, brief)
     except ValueError as e:
         raise HTTPException(status_code=503, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=502, detail="LLM analysis failed")
+    except AuthenticationError:
+        raise HTTPException(status_code=401, detail="Invalid LLM_API_KEY")
+    except RateLimitError:
+        raise HTTPException(
+            status_code=402,
+            detail="OpenAI quota exceeded. Add billing credits at platform.openai.com",
+        )
+    except APIError as e:
+        raise HTTPException(status_code=502, detail=e.message)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 @router.get("/{brief_id}/analysis", response_model=AnalysisResponse)
