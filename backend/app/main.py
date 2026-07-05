@@ -23,7 +23,7 @@ vercel_url = os.getenv("VERCEL_URL")
 if vercel_url:
     allowed_origins.append(f"https://{vercel_url}")
 
-allowed_origins.append("https://briefscope-ai.vercel.app")
+allowed_origins.append("https://briefgen-ai.vercel.app")
 
 app.add_middleware(
     CORSMiddleware,

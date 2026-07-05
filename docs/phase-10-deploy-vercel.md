@@ -80,23 +80,59 @@ git push origin main
 ### Step 2: Importa il progetto su Vercel
 
 1. Vai su [vercel.com/new](https://vercel.com/new)
-2. Accedi con GitHub
-3. Importa il repository `brief-ai`
-4. Nella schermata di configurazione:
+2. Accedi con GitHub (piano **Hobby** gratuito, **non serve Pro**)
+3. Se non vedi il repo, clicca **Adjust GitHub App Permissions** e abilita `vinscrank/brief-ai`
+4. Clicca **Import** accanto al repository
 
-| Campo | Valore |
-|-------|--------|
-| **Framework Preset** | Next.js |
-| **Root Directory** | `frontend` |
-| **Build Command** | `npm run build` (default) |
-| **Output Directory** | `.next` (default) |
-| **Install Command** | `npm install` (default) |
+### Step 3: Configurazione corretta (IMPORTANTE)
 
-> **Importante:** il repo è un monorepo. Se non imposti `frontend` come Root Directory, il deploy fallisce.
+Il repo e' un **monorepo**. Vercel deve deployare solo la cartella `frontend`.
 
-### Step 3: Environment Variables
+#### Root Directory
 
-Aggiungi questa variabile **prima** del primo deploy:
+**Settings → General → Root Directory**
+
+| Impostazione | Valore |
+|--------------|--------|
+| Root Directory | `frontend` |
+| Include files outside the root directory in the Build Step | **Enabled** (ON) |
+| Skip deployments when there are no changes to the root directory | **Enabled** (ON) — opzionale |
+
+Clicca **Save**.
+
+#### Build & Development Settings
+
+**Settings → General → Build & Development Settings**
+
+| Campo | Valore corretto | Override |
+|-------|-----------------|----------|
+| **Framework Preset** | **Next.js** | — |
+| Build Command | default (`npm run build`) | **OFF** |
+| Output Directory | default (vuoto) | **OFF** |
+| Install Command | default (`npm install`) | **OFF** |
+| Development Command | default | **OFF** |
+
+> **Attenzione:** se Framework Preset e' **Other**, Vercel tratta il progetto come sito statico e cerca una cartella `public` come output. Il deploy fallisce anche se Root Directory e' corretta.
+
+> I toggle **Override OFF** vanno bene cosi. Non serve forzare Build Command o Output Directory manualmente.
+
+#### File `frontend/vercel.json`
+
+Nel repo e' gia presente:
+
+```json
+{
+  "framework": "nextjs"
+}
+```
+
+Aiuta Vercel a riconoscere il framework Next.js.
+
+### Step 4: Environment Variables
+
+Aggiungi questa variabile **prima** del primo deploy (o subito dopo):
+
+**Settings → Environment Variables**
 
 | Name | Value | Environment |
 |------|-------|-------------|
@@ -104,7 +140,7 @@ Aggiungi questa variabile **prima** del primo deploy:
 
 Sostituisci l'URL con quello reale del tuo backend Cloud Run se diverso.
 
-### Step 4: Deploy
+### Step 5: Deploy
 
 Clicca **Deploy** e attendi 1-2 minuti.
 
@@ -112,6 +148,43 @@ Al termine otterrai un URL tipo:
 ```
 https://briefscope-ai.vercel.app
 ```
+
+Se vedi l'avviso giallo:
+> "Configuration Settings in the current Production deployment differ from your current Project Settings"
+
+Significa che il deploy precedente usava impostazioni sbagliate. Dopo aver corretto Framework e Root Directory, fai **Redeploy**.
+
+---
+
+## Configurazione che funziona (checklist)
+
+Usa questa checklist se il deploy fallisce o per verificare che tutto sia corretto:
+
+```
+[ ] Piano Vercel: Hobby (gratis)
+[ ] Root Directory: frontend
+[ ] Framework Preset: Next.js (NON "Other")
+[ ] Override Build Command: OFF
+[ ] Override Output Directory: OFF
+[ ] Override Install Command: OFF
+[ ] NEXT_PUBLIC_API_URL impostata su Vercel
+[ ] Redeploy dopo ogni modifica alle impostazioni
+[ ] FRONTEND_URL aggiornato su Cloud Run (CORS)
+```
+
+### Struttura monorepo
+
+```
+brief-ai/                    ← root repo GitHub
+├── backend/                 ← deploy su Cloud Run (Fase 9)
+├── docs/
+└── frontend/                ← Root Directory Vercel
+    ├── package.json         ← npm run build
+    ├── vercel.json
+    └── src/
+```
+
+Se Vercel guarda la root del repo invece di `frontend/`, non trova `package.json` e fallisce con errori su `public`.
 
 ---
 
@@ -173,7 +246,7 @@ vercel --prod
 
 ---
 
-## Step 5 — Configura CORS sul Backend
+## Configura CORS sul Backend
 
 Il frontend su Vercel chiama il backend su Cloud Run. Senza CORS corretto, il browser blocca le richieste.
 
@@ -200,7 +273,7 @@ Se usi un dominio custom su Vercel, aggiorna `FRONTEND_URL` con quello.
 
 ---
 
-## Step 6 — Verifica
+## Verifica post-deploy
 
 ### Checklist
 
@@ -264,52 +337,33 @@ Non serve fare nulla manualmente dopo la prima configurazione.
 
 ## Troubleshooting
 
-### Errore: `Missing public directory` + `Missing build script`
+### Errore: `Missing public directory` / `Missing build script`
 
-**Causa:** Vercel **non** sta usando la cartella `frontend`. Guarda la root del repo, non trova un `package.json` con build Next.js, e tratta il progetto come sito statico che deve outputtare in `public/`.
+**Sintomi:**
+- `No Output Directory named "public" found`
+- `Missing public directory`
+- `Missing build script`
 
-**Soluzione (passo passo):**
+**Causa principale:** **Framework Preset = Other** oppure **Root Directory** non impostata su `frontend`.
 
-1. Vercel Dashboard → il tuo progetto → **Settings**
-2. **General** → scorri fino a **Root Directory**
-3. Clicca **Edit** → scrivi o seleziona **`frontend`** → **Save**
-4. Sempre in **General** → **Build & Development Settings**:
-
-| Campo | Valore corretto |
-|-------|-----------------|
-| Framework Preset | **Next.js** |
-| Root Directory | **frontend** |
-| Build Command | default (override **OFF**) |
-| Output Directory | **vuoto** (override **OFF**) |
-| Install Command | default (override **OFF**) |
-
-5. **Deployments** → ultimo deploy → menu `...` → **Redeploy**
-
-**Se continua a fallire:** elimina il progetto su Vercel e reimportalo da zero, impostando **Root Directory = `frontend` PRIMA** del primo Deploy.
-
----
-
-### Errore: `No Output Directory named "public" found`
-
-**Causa:** in Vercel e' impostato **Output Directory = `public`**. Quello vale per siti statici, non per Next.js.
+Con "Other", Vercel usa il flusso sito statico e cerca output in `public/`. Next.js non funziona cosi.
 
 **Soluzione:**
 
-1. Vercel Dashboard → il tuo progetto → **Settings**
-2. **General** → **Build & Development Settings**
-3. Imposta cosi:
+1. **Settings → General → Root Directory** → `frontend` → Save
+2. **Settings → General → Build & Development Settings** → Framework Preset → **Next.js**
+3. Lascia tutti gli **Override OFF** (Build, Output, Install)
+4. **Deployments → Redeploy**
 
-| Campo | Valore |
-|-------|--------|
-| Framework Preset | **Next.js** |
-| Root Directory | **frontend** |
-| Build Command | `npm run build` (default) |
-| Output Directory | **vuoto** (disattiva l'override) |
-| Install Command | `npm install` (default) |
+**Se continua a fallire:** elimina il progetto su Vercel, reimporta da [vercel.com/new](https://vercel.com/new) e imposta **Root Directory + Next.js PRIMA** del primo Deploy.
 
-4. **Deployments** → ultimo deploy → **Redeploy**
+---
 
-> Per Next.js **non** impostare Output Directory. Vercel usa il builder Next.js e gestisce `.next` in automatico.
+### Avviso: "Configuration Settings differ from Project Settings"
+
+Compare quando hai cambiato le impostazioni ma l'ultimo deploy e' ancora quello vecchio (con "Other" o senza Root Directory).
+
+**Soluzione:** **Deployments → ... → Redeploy**
 
 ---
 
@@ -321,7 +375,7 @@ Non serve fare nulla manualmente dopo la prima configurazione.
 
 **Causa 2:** CORS non configurato.
 
-**Soluzione:** aggiorna `FRONTEND_URL` su Cloud Run (vedi Step 5)
+**Soluzione:** aggiorna `FRONTEND_URL` su Cloud Run (vedi sezione CORS sotto)
 
 ---
 
@@ -365,11 +419,14 @@ const nextConfig: NextConfig = {
 
 ## Costi
 
+**Non serve il piano Pro.** Il piano **Hobby** (gratuito) e' sufficiente per BriefScope AI.
+
 | Servizio | Free Tier |
 |----------|-----------|
 | Vercel Hobby | 100 GB bandwidth/mese |
-| Deploy illimitati | Sì |
-| Domini custom | Sì |
+| Deploy illimitati | Si |
+| Domini custom | Si |
+| CI/CD da GitHub | Si |
 
 Per un portfolio: **$0/mese**
 
