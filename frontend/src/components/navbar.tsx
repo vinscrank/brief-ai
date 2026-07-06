@@ -30,7 +30,7 @@ export function Navbar() {
               variant={isActive("/dashboard") ? "secondary" : "ghost"}
               size="sm"
               className={cn(
-                "h-9 w-9 px-0 sm:w-auto sm:px-3",
+                "h-9 w-9 px-0 sm:w-auto sm:gap-2 sm:px-3",
                 isActive("/dashboard") && "bg-secondary"
               )}
               aria-label="Dashboard"
@@ -43,7 +43,7 @@ export function Navbar() {
             <Button
               variant="glow"
               size="sm"
-              className="h-9 w-9 px-0 sm:w-auto sm:px-3"
+              className="h-9 w-9 px-0 sm:w-auto sm:gap-2 sm:px-3"
               aria-label="New Brief"
             >
               <Plus className="h-4 w-4" />

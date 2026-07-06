@@ -67,41 +67,31 @@ export default function DashboardPage() {
       <GridPattern />
       <Navbar />
 
-      <main className="container mx-auto px-4 py-8 relative z-10">
-        <div className="mb-10">
+      <main className="container mx-auto px-3 py-4 sm:px-4 sm:py-8 relative z-10">
+        <div className="mb-4 sm:mb-10">
           <FadeIn>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">
-                  <GradientText>Dashboard</GradientText>
-                </h1>
-                <p className="text-muted-foreground text-lg">
-                  Manage and analyze your project briefs
-                </p>
-              </div>
-              <MagneticButton>
-                <Link href="/briefs/new">
-                  <ShimmerButton>
-                    <Plus className="h-4 w-4" />
-                    New Brief
-                  </ShimmerButton>
-                </Link>
-              </MagneticButton>
+            <div>
+              <h1 className="text-2xl font-bold mb-0.5 sm:text-4xl sm:mb-2">
+                <GradientText>Dashboard</GradientText>
+              </h1>
+              <p className="text-muted-foreground text-xs sm:text-lg">
+                Manage and analyze your project briefs
+              </p>
             </div>
           </FadeIn>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-3 gap-2 mb-4 sm:gap-4 sm:mb-8 md:gap-6 md:mb-10">
           {[
-            { icon: FileText, label: "Total Briefs", value: stats.total, color: "cyan" },
-            { icon: Target, label: "Analysed", value: stats.analysed, color: "purple" },
-            { icon: Sparkles, label: "Proposals", value: stats.proposals, color: "green" },
+            { icon: FileText, label: "Total Briefs", shortLabel: "Briefs", value: stats.total, color: "cyan" },
+            { icon: Target, label: "Analysed", shortLabel: "Analysed", value: stats.analysed, color: "purple" },
+            { icon: Sparkles, label: "Proposals", shortLabel: "Proposals", value: stats.proposals, color: "green" },
           ].map((stat, i) => (
             <ScaleIn key={stat.label} delay={i * 0.1}>
-              <BentoCard className="p-6">
-                <div className="flex items-center gap-4">
+              <BentoCard className="p-2.5 sm:p-5 md:p-6">
+                <div className="flex flex-col items-center gap-1 text-center sm:flex-row sm:items-center sm:gap-4 sm:text-left">
                   <motion.div
-                    className={`p-3 rounded-xl ${
+                    className={`rounded-lg p-1.5 sm:rounded-xl sm:p-3 ${
                       stat.color === "cyan"
                         ? "bg-cyan-500/10 border border-cyan-500/20"
                         : stat.color === "purple"
@@ -111,7 +101,7 @@ export default function DashboardPage() {
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
                     <stat.icon
-                      className={`h-6 w-6 ${
+                      className={`h-4 w-4 sm:h-6 sm:w-6 ${
                         stat.color === "cyan"
                           ? "text-cyan-400"
                           : stat.color === "purple"
@@ -120,9 +110,12 @@ export default function DashboardPage() {
                       }`}
                     />
                   </motion.div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold">
+                  <div className="min-w-0">
+                    <p className="text-[10px] leading-tight text-muted-foreground sm:text-sm">
+                      <span className="sm:hidden">{stat.shortLabel}</span>
+                      <span className="hidden sm:inline">{stat.label}</span>
+                    </p>
+                    <p className="text-xl font-bold sm:text-3xl">
                       <CountUp end={stat.value} duration={1} />
                     </p>
                   </div>
@@ -133,12 +126,12 @@ export default function DashboardPage() {
         </div>
 
         <FadeIn delay={0.2}>
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-cyan-400 transition-colors" />
+          <div className="flex gap-2 mb-4 sm:flex-row sm:gap-4 sm:mb-8">
+            <div className="relative flex-1 group min-w-0">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-cyan-400 transition-colors sm:left-4" />
               <Input
-                placeholder="Search briefs by title, client, or source..."
-                className="pl-11 h-12 bg-card/50 backdrop-blur border-border/50 focus:border-cyan-500/50 transition-all"
+                placeholder="Search briefs..."
+                className="pl-9 h-10 text-sm bg-card/50 backdrop-blur border-border/50 focus:border-cyan-500/50 transition-all sm:pl-11 sm:h-12 sm:text-base"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -148,7 +141,7 @@ export default function DashboardPage() {
               size="icon"
               onClick={loadBriefs}
               disabled={loading}
-              className="h-12 w-12 border-border/50"
+              className="h-10 w-10 shrink-0 border-border/50 sm:h-12 sm:w-12"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
