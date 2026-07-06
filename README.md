@@ -4,11 +4,14 @@ AI platform to analyze technical briefs, extract scope, risks, and implementatio
 
 ## Stack
 
-- Python, FastAPI, SQLAlchemy, Pydantic
-- PostgreSQL (Neon)
-- OpenAI LLM API
+- **Backend:** Python, FastAPI, SQLAlchemy, Pydantic, Docker (Cloud Run)
+- **Frontend:** Next.js, React, Tailwind
+- **Database:** PostgreSQL (Neon)
+- **AI:** OpenAI LLM API
 
-## Setup
+## Setup (prima volta)
+
+**Backend**
 
 ```bash
 cd backend
@@ -18,13 +21,42 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Configure `DATABASE_URL` and optional `LLM_API_KEY` in `backend/.env`.
+Configura `DATABASE_URL` e opzionale `LLM_API_KEY` in `backend/.env`.
+
+**Frontend**
 
 ```bash
+cd frontend
+npm install
+```
+
+Opzionale: crea `frontend/.env.local` con `NEXT_PUBLIC_API_URL=http://localhost:8000` (è già il default se omesso).
+
+## Avvio locale
+
+Servono **due terminali** aperti.
+
+**Terminale 1 — Backend** (porta 8000)
+
+```bash
+cd backend
+source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
 ```
 
-API docs: http://localhost:8000/docs
+- API: http://localhost:8000
+- Swagger: http://localhost:8000/docs
+
+**Terminale 2 — Frontend** (porta 3000)
+
+```bash
+cd frontend
+npm run dev
+```
+
+- App: http://localhost:3000
+
+Il frontend in locale chiama il backend su `http://localhost:8000` (vedi `frontend/src/lib/api.ts`).
 
 ## Live (produzione)
 
