@@ -8,6 +8,7 @@ import {
   Brain,
   CheckCircle2,
   FileSearch,
+  LayoutDashboard,
   Lightbulb,
   MousePointer2,
   Sparkles,
@@ -100,34 +101,38 @@ export default function LandingPage() {
 
       <div className="relative z-10">
         <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/50 backdrop-blur-xl">
-          <div className="container mx-auto px-4 py-4">
-            <nav className="flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-3 group">
-                <motion.div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 shadow-lg shadow-cyan-500/25"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <Brain className="h-6 w-6 text-white" />
-                </motion.div>
-                <span className="text-xl font-bold">
-                  <GradientText>BriefScope AI</GradientText>
-                </span>
+          <div className="mx-auto flex min-w-0 max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6 sm:py-4">
+            <Link href="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3 group">
+              <motion.div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 shadow-lg shadow-cyan-500/25 sm:h-10 sm:w-10"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Brain className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+              </motion.div>
+              <span className="hidden truncate text-lg font-bold sm:block sm:text-xl">
+                <GradientText>BriefScope AI</GradientText>
+              </span>
+            </Link>
+            <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="hidden sm:flex">
+                  Dashboard
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 sm:hidden" aria-label="Dashboard">
+                  <LayoutDashboard className="h-4 w-4" />
+                </Button>
               </Link>
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard">
-                  <Button variant="ghost" className="hidden sm:flex">Dashboard</Button>
+              <MagneticButton>
+                <Link href="/briefs/new">
+                  <ShimmerButton className="h-9 px-3 text-sm sm:h-auto sm:px-4 sm:text-base">
+                    <span className="hidden sm:inline">Get Started</span>
+                    <span className="sm:hidden">Start</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </ShimmerButton>
                 </Link>
-                <MagneticButton>
-                  <Link href="/briefs/new">
-                    <ShimmerButton>
-                      Get Started
-                      <ArrowRight className="h-4 w-4" />
-                    </ShimmerButton>
-                  </Link>
-                </MagneticButton>
-              </div>
-            </nav>
+              </MagneticButton>
+            </div>
           </div>
         </header>
 

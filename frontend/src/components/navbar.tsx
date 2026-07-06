@@ -14,32 +14,40 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-purple-500">
-            <Brain className="h-5 w-5 text-white" />
+      <div className="mx-auto flex h-14 min-w-0 max-w-6xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-4 sm:px-6">
+        <Link href="/" className="flex min-w-0 shrink items-center gap-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-purple-500 sm:h-9 sm:w-9">
+            <Brain className="h-4 w-4 text-white sm:h-5 sm:w-5" />
           </div>
-          <span className="text-xl font-bold gradient-text">BriefScope AI</span>
+          <span className="hidden truncate text-lg font-bold gradient-text sm:block sm:text-xl">
+            BriefScope AI
+          </span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Link href="/dashboard">
             <Button
               variant={isActive("/dashboard") ? "secondary" : "ghost"}
               size="sm"
               className={cn(
-                "gap-2",
+                "h-9 w-9 px-0 sm:w-auto sm:px-3",
                 isActive("/dashboard") && "bg-secondary"
               )}
+              aria-label="Dashboard"
             >
               <LayoutDashboard className="h-4 w-4" />
-              Dashboard
+              <span className="hidden sm:inline">Dashboard</span>
             </Button>
           </Link>
           <Link href="/briefs/new">
-            <Button variant="glow" size="sm" className="gap-2">
+            <Button
+              variant="glow"
+              size="sm"
+              className="h-9 w-9 px-0 sm:w-auto sm:px-3"
+              aria-label="New Brief"
+            >
               <Plus className="h-4 w-4" />
-              New Brief
+              <span className="hidden sm:inline">New Brief</span>
             </Button>
           </Link>
           <ThemeToggle />
