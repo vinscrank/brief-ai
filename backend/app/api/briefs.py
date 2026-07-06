@@ -34,11 +34,3 @@ def update_brief(brief_id: UUID, data: BriefUpdate, db: Session = Depends(get_db
     if not brief:
         raise HTTPException(status_code=404, detail="Brief not found")
     return brief_service.update_brief(db, brief, data)
-
-
-@router.delete("/{brief_id}", status_code=204)
-def delete_brief(brief_id: UUID, db: Session = Depends(get_db)):
-    brief = brief_service.get_brief(db, brief_id)
-    if not brief:
-        raise HTTPException(status_code=404, detail="Brief not found")
-    brief_service.delete_brief(db, brief)

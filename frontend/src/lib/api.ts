@@ -98,12 +98,6 @@ export async function updateBrief(
   });
 }
 
-export async function deleteBrief(id: string): Promise<void> {
-  return fetchApi<void>(`/briefs/${id}`, {
-    method: "DELETE",
-  });
-}
-
 export async function analyzeBrief(id: string): Promise<Analysis> {
   return fetchApi<Analysis>(`/briefs/${id}/analyze`, {
     method: "POST",

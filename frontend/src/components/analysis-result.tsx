@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BentoCard } from "@/components/ui/feature-card";
-import { GradientText, CountUp } from "@/components/ui/animated-text";
+import { GradientText } from "@/components/ui/animated-text";
 import { Analysis } from "@/lib/api";
 import { cn } from "@/lib/utils";
 

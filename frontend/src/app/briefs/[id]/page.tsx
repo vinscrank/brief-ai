@@ -15,7 +15,6 @@ import {
   Loader2,
   Sparkles,
   Target,
-  Trash2,
   Zap,
 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -38,7 +37,6 @@ import {
   getProposal,
   analyzeBrief,
   generateProposal,
-  deleteBrief,
 } from "@/lib/api";
 import { cn, formatDate, getStatusColor, getRiskColor } from "@/lib/utils";
 
@@ -288,7 +286,6 @@ export default function BriefDetailPage() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analyzeStep, setAnalyzeStep] = useState(0);
   const [proposalStep, setProposalStep] = useState(0);
@@ -374,19 +371,6 @@ export default function BriefDetailPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this brief?")) return;
-
-    setDeleting(true);
-    try {
-      await deleteBrief(briefId);
-      router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
-      setDeleting(false);
-    }
-  };
-
   const copyBriefText = async () => {
     if (brief) {
       await navigator.clipboard.writeText(brief.brief_text);
@@ -460,69 +444,64 @@ export default function BriefDetailPage() {
         </FadeIn>
 
         <FadeIn delay={0.1}>
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl font-bold">
-                  <GradientText>{brief.title}</GradientText>
-                </h1>
-                <Badge
-                  variant="outline"
-                  className={cn("text-sm", getStatusColor(brief.status))}
-                >
-                  {brief.status}
-                </Badge>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                {brief.client_name && (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                    <Building2 className="h-4 w-4" />
-                    {brief.client_name}
-                  </div>
-                )}
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                  <FileText className="h-4 w-4" />
-                  {brief.source_type}
+          <div className="mb-6 rounded-2xl border border-white/10 bg-card/30 p-4 backdrop-blur-sm sm:mb-8 sm:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 flex-1 space-y-4">
+                <div className="space-y-3">
+                  <h1 className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+                    <GradientText>{brief.title}</GradientText>
+                  </h1>
+                  <Badge
+                    variant="outline"
+                    className={cn("w-fit text-xs sm:text-sm", getStatusColor(brief.status))}
+                  >
+                    {brief.status}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(brief.created_at)}
-                </div>
-                {brief.risk_level && (
-                  <span className={cn("px-3 py-1 rounded-full bg-white/5 border border-white/10", getRiskColor(brief.risk_level))}>
-                    Risk: {brief.risk_level}
-                  </span>
-                )}
-              </div>
-            </div>
 
-            <div className="flex flex-wrap gap-3">
-              {!analysis && !analyzing && (
-                <ShimmerButton onClick={handleAnalyze} className="gap-2">
-                  <Brain className="h-4 w-4" />
-                  Analyze with AI
-                </ShimmerButton>
-              )}
-              {analysis && !proposal && !generating && (
-                <ShimmerButton onClick={handleGenerateProposal} className="gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Generate Proposal
-                </ShimmerButton>
-              )}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
-              >
-                {deleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2">
+                  {brief.client_name && (
+                    <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-muted-foreground sm:rounded-full sm:px-3 sm:text-sm">
+                      <Building2 className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{brief.client_name}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-muted-foreground sm:rounded-full sm:px-3 sm:text-sm">
+                    <FileText className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{brief.source_type}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-muted-foreground sm:rounded-full sm:px-3 sm:text-sm">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{formatDate(brief.created_at)}</span>
+                  </div>
+                  {brief.risk_level && (
+                    <div
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs sm:rounded-full sm:px-3 sm:text-sm",
+                        getRiskColor(brief.risk_level)
+                      )}
+                    >
+                      <Target className="h-3.5 w-3.5 shrink-0" />
+                      <span>Risk: {brief.risk_level}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex shrink-0 flex-wrap gap-2 lg:pt-1">
+                {!analysis && !analyzing && (
+                  <ShimmerButton onClick={handleAnalyze} className="w-full gap-2 sm:w-auto">
+                    <Brain className="h-4 w-4" />
+                    Analyze with AI
+                  </ShimmerButton>
                 )}
-              </Button>
+                {analysis && !proposal && !generating && (
+                  <ShimmerButton onClick={handleGenerateProposal} className="w-full gap-2 sm:w-auto">
+                    <Sparkles className="h-4 w-4" />
+                    Generate Proposal
+                  </ShimmerButton>
+                )}
+              </div>
             </div>
           </div>
         </FadeIn>
