@@ -74,3 +74,4 @@ See `docs/` for step-by-step guides:
 - Phase 8: frontend Next.js
 - Phase 9: deploy backend (Docker + Google Cloud Run)
 - Phase 10: deploy frontend (Vercel)
+- Reference: [Cloud Run e Artifact Registry](docs/reference-gcp-cloud-run-artifact-registry.md) (teoria GCP, glossario, CV)

@@ -6,6 +6,8 @@ Deployare il backend FastAPI su Google Cloud Run usando Docker.
 
 **Skill per il CV:** Docker, Google Cloud Platform, Cloud Run, Artifact Registry, CI/CD
 
+**Teoria dettagliata:** vedi `docs/reference-gcp-cloud-run-artifact-registry.md` (cosa sono Cloud Run e Artifact Registry, glossario, quiz)
+
 ---
 
 ## Prerequisiti
